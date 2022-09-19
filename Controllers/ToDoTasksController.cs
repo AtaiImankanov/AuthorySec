@@ -22,24 +22,22 @@ namespace lavAspMvclast.Controllers
         {
             _context = context;
             _userManager = userManager;
-            context.Roles.ToList();
+            var roles = context.Roles.ToList();
         }
 
         // GET: ToDoTasks
-        [Authorize(Roles = "admin, user")]
-        public IActionResult Index( SortState sortOrder,DateTime From,DateTime To,string Name,string WordInDescription, int Priority, int Status  ,int page = 1) {
+        public async Task<IActionResult> Index( SortState sortOrder,DateTime From,DateTime To,string Name,string WordInDescription, int Priority, int Status  ,int page = 1) {
             IQueryable<ToDoTask> tasks = _context.ToDoTasks;
             DateTime tNull= new DateTime(0001,01,01,00,00,00);
             System.Security.Claims.ClaimsPrincipal currentUser = this.User;
             int idUser = Convert.ToInt32(_userManager.GetUserId(currentUser));
+            var user  = _userManager.Users.FirstOrDefault(x => x.Id == idUser);
             ViewBag.UserId = idUser;
             int adminIdUser = 0;
-            foreach (var u in _userManager.Users)
+            var roles =await  _userManager.IsInRoleAsync(user, "admin");
+            if (roles == true)
             {
-                if (u.Email == "admin@admin.com")
-                {
-                    adminIdUser = u.Id;
-                }
+                adminIdUser = 1;
             }
             ViewBag.AdminUserId = adminIdUser;
             if (From != tNull && From != null)
@@ -114,7 +112,7 @@ namespace lavAspMvclast.Controllers
         }
 
         // GET: ToDoTasks/Details/5
-        [Authorize(Roles = "admin, user")]
+      
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -133,13 +131,12 @@ namespace lavAspMvclast.Controllers
         }
 
         // GET: ToDoTasks/Create
-        [Authorize(Roles = "admin, user")]
+     
         public IActionResult Create()
         {
 
             return View();
         }
-        [Authorize(Roles = "admin, user")]
         public IActionResult Home()
         {
 
@@ -151,7 +148,7 @@ namespace lavAspMvclast.Controllers
         // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "admin, user")]
+   
         public async Task<IActionResult> Create([Bind("Id,Name,Description,Priority,DateCreated,DateClosed,Status")] ToDoTask toDoTask)
         {
             if (ModelState.IsValid)
@@ -170,7 +167,7 @@ namespace lavAspMvclast.Controllers
         }
 
         // GET: ToDoTasks/Edit/5
-        [Authorize(Roles = "admin, user")]
+
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -191,7 +188,7 @@ namespace lavAspMvclast.Controllers
         // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "admin, user")]
+
         public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Description,Priority,DateCreated,DateClosed,Status")] ToDoTask toDoTask)
         {
             if (id != toDoTask.Id)
@@ -223,7 +220,7 @@ namespace lavAspMvclast.Controllers
         }
 
         // GET: ToDoTasks/Delete/5
-        [Authorize(Roles = "admin, user")]
+
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -244,7 +241,7 @@ namespace lavAspMvclast.Controllers
         // POST: ToDoTasks/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "admin, user")]
+
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var toDoTask = await _context.ToDoTasks.FindAsync(id);
@@ -257,7 +254,7 @@ namespace lavAspMvclast.Controllers
         {
             return _context.ToDoTasks.Any(e => e.Id == id);
         }
-        [Authorize(Roles = "admin, user")]
+
         public IActionResult Close(int id)
         {
             var toDoTask =_context.ToDoTasks.Find(id);
@@ -266,7 +263,7 @@ namespace lavAspMvclast.Controllers
             _context.SaveChanges();
             return Redirect("/ToDoTasks/Index");
         }
-        [Authorize(Roles = "admin, user")]
+
         public IActionResult Open(int id)
         {
             var toDoTask = _context.ToDoTasks.Find(id);
@@ -275,7 +272,7 @@ namespace lavAspMvclast.Controllers
             _context.SaveChanges();
             return Redirect("/ToDoTasks/Index");
         }
-        [Authorize(Roles = "admin, user")]
+
         public IActionResult Take(int id)
         {
             var toDoTask = _context.ToDoTasks.Find(id);
@@ -289,7 +286,7 @@ namespace lavAspMvclast.Controllers
             _context.SaveChanges();
             return Redirect("/ToDoTasks/Index");
         }
-        [Authorize(Roles = "admin, user")]
+
         public IActionResult Filter(int Id)
         {
             TaskPageModel model = null;

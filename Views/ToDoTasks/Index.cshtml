@@ -90,7 +90,7 @@
                     }
             </td>
             <td>
-                    @if (@ViewBag.UserId == @ViewBag.AdminUserId)
+                    @if (1 == @ViewBag.AdminUserId)
                     {
                         <a asp-action="Open" asp-controller="ToDoTasks" asp-route-id="@item.Id">Open  |</a>
                         <a asp-action="Edit" asp-controller="ToDoTasks" asp-route-id="@item.Id">Edit  |</a>
